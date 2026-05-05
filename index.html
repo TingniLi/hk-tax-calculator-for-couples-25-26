@@ -3,59 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>香港25/26年度夫妻薪俸税优化计算器</title>
+    <title>香港25/26年度薪俸税分配优化器</title>
     <style>
-        :root { --primary-color: #0056b3; --bg-color: #f4f7f6; }
+        :root { --primary-color: #0056b3; --bg-color: #f4f7f6; --accent-color: #e9ecef; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: #333; line-height: 1.6; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: var(--primary-color); font-size: 24px; }
-        h2 { border-bottom: 2px solid #eaeaea; padding-bottom: 5px; font-size: 18px; margin-top: 30px; }
+        .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: var(--primary-color); font-size: 26px; margin-bottom: 5px; }
+        h2 { border-bottom: 2px solid #eaeaea; padding-bottom: 5px; font-size: 18px; margin-top: 30px; color: #222; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .card { background: #fafafa; padding: 20px; border-radius: 8px; border: 1px solid #ddd; }
-        label { display: block; margin-bottom: 8px; font-weight: 500; }
-        input[type="number"], select { width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { background-color: var(--primary-color); color: white; border: none; padding: 12px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; width: 100%; transition: 0.3s; }
+        .card { background: #fafafa; padding: 20px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 15px; }
+        .card h3 { margin-top: 0; color: #0056b3; font-size: 16px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; }
+        label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: #444; }
+        input[type="number"], select, input[type="text"] { width: 100%; padding: 8px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: inherit; }
+        button { background-color: var(--primary-color); color: white; border: none; padding: 12px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; width: 100%; transition: 0.3s; font-weight: bold; }
         button:hover { background-color: #004494; }
-        .result-box { margin-top: 20px; padding: 15px; border-radius: 5px; display: none; }
+        .btn-add { background-color: #17a2b8; width: auto; padding: 8px 15px; font-size: 14px; margin-bottom: 15px; display: inline-block;}
+        .btn-add:hover { background-color: #138496; }
+        .btn-remove { background-color: #dc3545; padding: 8px; width: auto; font-size: 14px; margin-left: 10px; }
+        .btn-remove:hover { background-color: #c82333; }
+        .vhis-row { display: flex; align-items: center; gap: 10px; background: #fff; padding: 10px; border: 1px solid #eee; border-radius: 5px; margin-bottom: 10px; }
+        .vhis-row input { margin-bottom: 0; }
+        .result-box { margin-top: 20px; padding: 15px; border-radius: 5px; display: none; font-size: 15px; }
         .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
         .info { background-color: #e2e3e5; border: 1px solid #d6d8db; color: #383d41; }
         .warning { background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404; }
-        .privacy-note { font-size: 12px; color: #666; text-align: center; margin-top: 20px; }
+        .privacy-note { font-size: 13px; color: #666; text-align: center; margin-top: 20px; }
+        .help-text { font-size: 12px; color: #777; display: block; margin-top: -10px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>香港25/26年度夫妻薪俸税分配优化器</h1>
-    <p style="text-align: center; font-size: 14px; color: #666;">基于2025/26年度财政预算案税率与宽减（上限$3,000）</p>
+    <h1>香港25/26年度薪俸税分配优化器</h1>
+    <p style="text-align: center; font-size: 14px; color: #666;">基于2025/26年度财政预算案税率与宽减（上限$3,000）。适用于双薪伴侣。</p>
 
-    <h2>1. 个人基础数据 (不可分配项目)</h2>
+    <h2>1. 个人专属项目 (不可分配, 仅供各自扣减)</h2>
     <div class="grid-2">
-        <div class="card">
-            <h3 style="margin-top: 0; color: #444;">丈夫</h3>
+        <div class="card" id="partner1-card">
+            <h3>🧑‍💼 伴侣 1</h3>
             <label>全年薪俸总收入 (HK$):</label>
-            <input type="number" id="incH" value="0" min="0">
-            <label>专属扣除 (如强积金最高1.8万/进修等):</label>
-            <input type="number" id="dedH" value="0" min="0">
+            <input type="number" id="inc1" value="0" min="0">
+            <label>强积金/认可退休计划强制性供款:</label>
+            <span class="help-text">最高 $18,000</span>
+            <input type="number" id="mpf1" value="0" min="0">
+            <label>个人进修开支:</label>
+            <span class="help-text">最高 $100,000</span>
+            <input type="number" id="edu1" value="0" min="0">
+            <label>合资格年金保费及可扣税强积金自愿性供款:</label>
+            <span class="help-text">最高 $60,000</span>
+            <input type="number" id="qdap1" value="0" min="0">
+            <label>支出及开支 (如专业学会会费等):</label>
+            <input type="number" id="exp1" value="0" min="0">
+            <label>专属受养人免税额 (如供养父母/伤残):</label>
+            <span class="help-text">请填入总额，不含子女免税额</span>
+            <input type="number" id="allow1" value="0" min="0">
         </div>
-        <div class="card">
-            <h3 style="margin-top: 0; color: #444;">妻子</h3>
+        <div class="card" id="partner2-card">
+            <h3>🧑‍💼 伴侣 2</h3>
             <label>全年薪俸总收入 (HK$):</label>
-            <input type="number" id="incW" value="0" min="0">
-            <label>专属扣除 (如强积金最高1.8万/进修等):</label>
-            <input type="number" id="dedW" value="0" min="0">
+            <input type="number" id="inc2" value="0" min="0">
+            <label>强积金/认可退休计划强制性供款:</label>
+            <span class="help-text">最高 $18,000</span>
+            <input type="number" id="mpf2" value="0" min="0">
+            <label>个人进修开支:</label>
+            <span class="help-text">最高 $100,000</span>
+            <input type="number" id="edu2" value="0" min="0">
+            <label>合资格年金保费及可扣强积金自愿性供款:</label>
+            <span class="help-text">最高 $60,000</span>
+            <input type="number" id="qdap2" value="0" min="0">
+            <label>支出及开支 (如专业学会会费等):</label>
+            <input type="number" id="exp2" value="0" min="0">
+            <label>专属受养人免税额 (如供养父母/伤残):</label>
+            <span class="help-text">请填入总额，不含子女免税额</span>
+            <input type="number" id="allow2" value="0" min="0">
         </div>
     </div>
 
-    <h2>2. 家庭可分配额度 (由系统寻找最佳分配)</h2>
+    <h2>2. 家庭可分配项目 (由系统寻找最佳分配)</h2>
     <div class="card">
-        <label>供养子女人数 (每名子女免税额$130,000):</label>
+        <label>供养子女人数:</label>
+        <span class="help-text">每名子女免税额 $130,000</span>
         <input type="number" id="children" value="0" min="0">
-        <label>可分配住宅租金扣除总计 (上限通常为$100,000):</label>
-        <input type="number" id="rentTotal" value="0" min="0">
-        <label>其他可分配扣除总计 (如长者照顾/房贷利息等):</label>
-        <input type="number" id="otherTotal" value="0" min="0">
-        <button onclick="generateBestAllocation()">生成最佳分配模式</button>
+        
+        <div class="grid-2">
+            <div>
+                <label>住宅租金扣除总计:</label>
+                <span class="help-text">上限通常为 $100,000</span>
+                <input type="number" id="rentTotal" value="0" min="0">
+            </div>
+            <div>
+                <label>居所贷款利息总计:</label>
+                <span class="help-text">上限为 $100,000</span>
+                <input type="number" id="loanTotal" value="0" min="0">
+            </div>
+            <div>
+                <label>长者住宿照顾开支总计:</label>
+                <span class="help-text">上限为 $100,000</span>
+                <input type="number" id="careTotal" value="0" min="0">
+            </div>
+            <div>
+                <label>认可慈善捐款总计:</label>
+                <span class="help-text">受限于入息百分比</span>
+                <input type="number" id="charityTotal" value="0" min="0">
+            </div>
+        </div>
+
+        <h3 style="margin-top:20px; border-top:1px solid #ddd; padding-top:15px;">🏥 自愿医保计划保单合资格保费 (VHIS)</h3>
+        <p style="font-size:13px; color:#666; margin-top:-5px;">每名受保人最高 $8,000。系统会自动将其以“全或无”的形式分配给最划算的伴侣。</p>
+        <div id="vhis-container">
+            </div>
+        <button class="btn-add" onclick="addVHISItem()">+ 新增受保人合资格保费</button>
+
+        <button style="margin-top: 15px;" onclick="generateBestAllocation()">✨ 生成最佳分配模式</button>
     </div>
     <div id="sysResult" class="result-box success"></div>
 
@@ -68,34 +127,33 @@
         </select>
         <label>子女免税额归属:</label>
         <select id="customChild">
-            <option value="H">全部归丈夫</option>
-            <option value="W">全部归妻子</option>
+            <option value="1">全部归 伴侣 1</option>
+            <option value="2">全部归 伴侣 2</option>
         </select>
-        <div class="grid-2">
+        
+        <div class="grid-2" style="margin-top: 10px;">
             <div>
-                <label>丈夫分担租金扣除:</label>
-                <input type="number" id="customRentH" value="0" min="0">
+                <label>伴侣 1 分担的共享扣除总额:</label>
+                <span class="help-text">(包含租金+房贷+照顾+慈善)</span>
+                <input type="number" id="customShare1" value="0" min="0">
             </div>
             <div>
-                <label>妻子分担租金扣除 (自动计算):</label>
-                <input type="number" id="customRentW" value="0" min="0" readonly style="background:#eee;">
-            </div>
-        </div>
-        <div class="grid-2">
-            <div>
-                <label>丈夫分担其他扣除:</label>
-                <input type="number" id="customOtherH" value="0" min="0">
-            </div>
-            <div>
-                <label>妻子分担其他扣除 (自动计算):</label>
-                <input type="number" id="customOtherW" value="0" min="0" readonly style="background:#eee;">
+                <label>伴侣 2 分担的共享扣除总额:</label>
+                <span class="help-text">自动计算</span>
+                <input type="number" id="customShare2" value="0" min="0" readonly style="background:#eee;">
             </div>
         </div>
-        <button style="background-color: #28a745;" onclick="verifyCustomAllocation()">验证是否为最佳模式</button>
+
+        <h3 style="font-size: 15px; margin-top:10px;">自愿医保保费归属验证:</h3>
+        <div id="custom-vhis-container" style="margin-bottom: 15px; font-size: 14px; color: #555;">
+            (请先在上方点击生成最佳分配模式，此处将同步您的保单列表)
+        </div>
+
+        <button style="background-color: #28a745;" onclick="verifyCustomAllocation()">🔍 验证是否为最佳模式</button>
     </div>
     <div id="verifyResult" class="result-box info"></div>
     
-    <p class="privacy-note">🔒 安全声明：所有计算均在您的浏览器本地进行，数据不会上传至任何服务器。</p>
+    <p class="privacy-note">🔒 安全声明：所有计算均在您的浏览器本地进行，财务数据绝对隐私，不会上传至任何服务器。</p>
 </div>
 
 <script>
@@ -103,18 +161,88 @@
     const BASIC_ALLOWANCE = 132000;
     const MARRIED_ALLOWANCE = 264000;
     const CHILD_ALLOWANCE_PER_KID = 130000;
+    
     let minTaxGlobal = null; 
+    let vhisIdCounter = 0;
 
-    // 计算个人的税款 (25/26年度)
+    // 添加 VHIS 项目
+    function addVHISItem() {
+        let container = document.getElementById('vhis-container');
+        let id = vhisIdCounter++;
+        let div = document.createElement('div');
+        div.className = 'vhis-row';
+        div.id = `vhis-row-${id}`;
+        div.innerHTML = `
+            <input type="text" id="vhis-name-${id}" placeholder="受保人(如:儿子)" style="flex:1;">
+            <input type="number" id="vhis-amount-${id}" placeholder="保费(上限8000)" style="flex:1;" min="0">
+            <button class="btn-remove" onclick="removeVHISItem(${id})">删除</button>
+        `;
+        container.appendChild(div);
+        updateCustomVHISList(); // 同步到验证区域
+    }
+
+    // 移除 VHIS 项目
+    function removeVHISItem(id) {
+        let el = document.getElementById(`vhis-row-${id}`);
+        if(el) el.remove();
+        updateCustomVHISList();
+    }
+
+    // 获取当前 VHIS 列表数据
+    function getVHISData() {
+        let items = [];
+        let rows = document.querySelectorAll('.vhis-row');
+        rows.forEach(row => {
+            let id = row.id.split('-')[2];
+            let name = document.getElementById(`vhis-name-${id}`).value || `未命名受保人`;
+            let amount = Number(document.getElementById(`vhis-amount-${id}`).value) || 0;
+            if(amount > 0) items.push({ id: id, name: name, amount: amount });
+        });
+        return items;
+    }
+
+    // 同步验证区域的 VHIS 列表
+    function updateCustomVHISList() {
+        let items = getVHISData();
+        let container = document.getElementById('custom-vhis-container');
+        if (items.length === 0) {
+            container.innerHTML = "无自愿医保保费需要分配。";
+            return;
+        }
+        let html = '';
+        items.forEach(item => {
+            html += `
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px; border-bottom:1px dashed #ddd; padding-bottom:5px;">
+                    <span>${item.name} ($${item.amount}):</span>
+                    <select id="custom-vhis-assign-${item.id}" style="width:auto; padding:2px 5px; margin-bottom:0;">
+                        <option value="1">归伴侣 1</option>
+                        <option value="2">归伴侣 2</option>
+                    </select>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    // 自动计算共享扣除的余额
+    document.getElementById('customShare1').addEventListener('input', function() {
+        let rent = Number(document.getElementById('rentTotal').value) || 0;
+        let loan = Number(document.getElementById('loanTotal').value) || 0;
+        let care = Number(document.getElementById('careTotal').value) || 0;
+        let charity = Number(document.getElementById('charityTotal').value) || 0;
+        let totalContinuous = rent + loan + care + charity;
+        let share1 = Number(this.value) || 0;
+        document.getElementById('customShare2').value = Math.max(0, totalContinuous - share1);
+    });
+
+    // 计算个人的税款
     function calculateSingleTax(netTotalIncome, totalAllowances) {
         if (netTotalIncome <= 0) return 0;
         
-        // 标准税率计算 (以净入息计算，不扣减免税额)
         let standardTax = netTotalIncome <= 5000000 
             ? netTotalIncome * 0.15 
             : (5000000 * 0.15 + (netTotalIncome - 5000000) * 0.16);
             
-        // 累进税率计算 (扣减免税额后)
         let netChargeableIncome = netTotalIncome - totalAllowances;
         let progressiveTax = 0;
         if (netChargeableIncome > 0) {
@@ -127,161 +255,232 @@
         }
         
         let baseTax = Math.min(standardTax, progressiveTax);
-        return Math.max(0, baseTax - TAX_REDUCTION_CAP); // 宽减上限
+        return Math.max(0, baseTax - TAX_REDUCTION_CAP); 
+    }
+
+    // 辅助分配：将总金额贪婪地分配给具体类目用于展示
+    function distributeContinuous(amount, rent, loan, care, charity) {
+        let res = { rent: 0, loan: 0, care: 0, charity: 0 };
+        let rem = amount;
+        res.rent = Math.min(rem, rent); rem -= res.rent;
+        res.loan = Math.min(rem, loan); rem -= res.loan;
+        res.care = Math.min(rem, care); rem -= res.care;
+        res.charity = Math.min(rem, charity); rem -= res.charity;
+        return res;
     }
 
     // 搜索最佳分配算法
     function generateBestAllocation() {
-        let incH = Number(document.getElementById('incH').value) || 0;
-        let dedH = Number(document.getElementById('dedH').value) || 0;
-        let incW = Number(document.getElementById('incW').value) || 0;
-        let dedW = Number(document.getElementById('dedW').value) || 0;
-        
+        updateCustomVHISList(); // 确保验证区的列表最新
+
+        // 伴侣 1 数据
+        let inc1 = Number(document.getElementById('inc1').value) || 0;
+        let allowDeps1 = Number(document.getElementById('allow1').value) || 0;
+        let ded1 = (Number(document.getElementById('mpf1').value) || 0) + 
+                   (Number(document.getElementById('edu1').value) || 0) + 
+                   (Number(document.getElementById('qdap1').value) || 0) + 
+                   (Number(document.getElementById('exp1').value) || 0);
+
+        // 伴侣 2 数据
+        let inc2 = Number(document.getElementById('inc2').value) || 0;
+        let allowDeps2 = Number(document.getElementById('allow2').value) || 0;
+        let ded2 = (Number(document.getElementById('mpf2').value) || 0) + 
+                   (Number(document.getElementById('edu2').value) || 0) + 
+                   (Number(document.getElementById('qdap2').value) || 0) + 
+                   (Number(document.getElementById('exp2').value) || 0);
+
+        // 共享数据
         let childrenCount = Number(document.getElementById('children').value) || 0;
-        let rentTotal = Number(document.getElementById('rentTotal').value) || 0;
-        let otherTotal = Number(document.getElementById('otherTotal').value) || 0;
-        
         let totalChildAllowance = childrenCount * CHILD_ALLOWANCE_PER_KID;
         
+        let rentT = Number(document.getElementById('rentTotal').value) || 0;
+        let loanT = Number(document.getElementById('loanTotal').value) || 0;
+        let careT = Number(document.getElementById('careTotal').value) || 0;
+        let charityT = Number(document.getElementById('charityTotal').value) || 0;
+        let totalContinuous = rentT + loanT + careT + charityT;
+
+        let vhisItems = getVHISData();
+        let numVHIS = vhisItems.length;
+        let combinationsVHIS = 1 << numVHIS; // 2的N次方种组合
+
         let minTax = Infinity;
         let bestConfig = null;
+        let step = totalContinuous > 20000 ? 1000 : (totalContinuous > 0 ? 500 : 1000);
 
-        let stepRent = rentTotal > 10000 ? 1000 : (rentTotal > 0 ? 500 : 1000);
-        let stepOther = otherTotal > 10000 ? 1000 : (otherTotal > 0 ? 500 : 1000);
+        // 核心穷举 (秒级计算)
+        for (let childTo1 of [true, false]) {
+            for (let vhisMask = 0; vhisMask < combinationsVHIS; vhisMask++) {
+                let vhis1 = 0, vhis2 = 0;
+                let currentVhisAlloc = [];
+                for(let i = 0; i < numVHIS; i++) {
+                    if ((vhisMask & (1 << i)) === 0) {
+                        vhis1 += vhisItems[i].amount;
+                        currentVhisAlloc.push({ name: vhisItems[i].name, amount: vhisItems[i].amount, to: 1 });
+                    } else {
+                        vhis2 += vhisItems[i].amount;
+                        currentVhisAlloc.push({ name: vhisItems[i].name, amount: vhisItems[i].amount, to: 2 });
+                    }
+                }
 
-        // 暴力穷举分配（JS 在浏览器端执行百万次运算只需几毫秒，这里步长通常只有百次循环）
-        for (let childToH of [true, false]) {
-            for (let rentH = 0; rentH <= rentTotal; rentH += stepRent) {
-                if(rentH > rentTotal) rentH = rentTotal; 
-                let rentW = rentTotal - rentH;
-                
-                for (let otherH = 0; otherH <= otherTotal; otherH += stepOther) {
-                    if(otherH > otherTotal) otherH = otherTotal;
-                    let otherW = otherTotal - otherH;
-                    
+                for (let share1 = 0; share1 <= totalContinuous; share1 += step) {
+                    if (share1 > totalContinuous) share1 = totalContinuous;
+                    let share2 = totalContinuous - share1;
+
                     // 分开评税
-                    let ntiH = incH - (dedH + rentH + otherH);
-                    let ntiW = incW - (dedW + rentW + otherW);
-                    let allowH = BASIC_ALLOWANCE + (childToH ? totalChildAllowance : 0);
-                    let allowW = BASIC_ALLOWANCE + (!childToH ? totalChildAllowance : 0);
-                    
-                    let taxH = calculateSingleTax(ntiH, allowH);
-                    let taxW = calculateSingleTax(ntiW, allowW);
-                    let sepTaxTotal = taxH + taxW;
-                    
+                    let nti1 = inc1 - (ded1 + vhis1 + share1);
+                    let nti2 = inc2 - (ded2 + vhis2 + share2);
+                    let allow1 = BASIC_ALLOWANCE + allowDeps1 + (childTo1 ? totalChildAllowance : 0);
+                    let allow2 = BASIC_ALLOWANCE + allowDeps2 + (!childTo1 ? totalChildAllowance : 0);
+
+                    let tax1 = calculateSingleTax(nti1, allow1);
+                    let tax2 = calculateSingleTax(nti2, allow2);
+                    let sepTaxTotal = tax1 + tax2;
+
                     // 合并评税
-                    let ntiJoint = (incH + incW) - (dedH + dedW + rentTotal + otherTotal);
-                    let taxJoint = calculateSingleTax(ntiJoint, MARRIED_ALLOWANCE + totalChildAllowance);
-                    
+                    let jointNti = (inc1 + inc2) - (ded1 + ded2 + vhis1 + vhis2 + totalContinuous);
+                    let jointAllow = MARRIED_ALLOWANCE + allowDeps1 + allowDeps2 + totalChildAllowance;
+                    let taxJoint = calculateSingleTax(jointNti, jointAllow);
+
                     let currentMin = Math.min(sepTaxTotal, taxJoint);
                     let isJoint = taxJoint < sepTaxTotal;
-                    
+
                     if (currentMin < minTax) {
                         minTax = currentMin;
                         bestConfig = {
-                            isJoint: isJoint, childToH: childToH,
-                            rentH: rentH, rentW: rentW, otherH: otherH, otherW: otherW,
-                            taxH: isJoint ? 0 : taxH, taxW: isJoint ? 0 : taxW, totalTax: currentMin
+                            isJoint: isJoint, childTo1: childTo1,
+                            vhisAlloc: currentVhisAlloc,
+                            share1: share1, share2: share2,
+                            tax1: isJoint ? 0 : tax1, tax2: isJoint ? 0 : tax2, totalTax: currentMin
                         };
                     }
-                    if(otherH === otherTotal) break;
+                    if (share1 === totalContinuous) break;
                 }
-                if(rentH === rentTotal) break;
             }
         }
 
-        minTaxGlobal = minTax; // 记录给验证功能使用
-        
+        minTaxGlobal = minTax;
+
+        let d1 = distributeContinuous(bestConfig.share1, rentT, loanT, careT, charityT);
+        let d2 = distributeContinuous(bestConfig.share2, rentT - d1.rent, loanT - d1.loan, careT - d1.care, charityT - d1.charity);
+
+        let vhisHtml = bestConfig.vhisAlloc.map(v => 
+            `- ${v.name} ($${v.amount}) ➔ 归 <b>伴侣 ${v.to}</b>`
+        ).join('<br>');
+        if(!vhisHtml) vhisHtml = "- 无保单录入";
+
         let resDiv = document.getElementById('sysResult');
         resDiv.style.display = 'block';
         resDiv.className = 'result-box success';
         resDiv.innerHTML = `
-            <strong>🌟 系统推荐最佳方案 (${bestConfig.isJoint ? '合并评税' : '分开评税'}):</strong><br>
-            - 子女免税额归属: ${bestConfig.childToH ? '丈夫' : '妻子'}名下<br>
-            - 住宅租金扣除: 丈夫填 <b>$${bestConfig.rentH}</b>，妻子填 <b>$${bestConfig.rentW}</b><br>
-            - 其他扣除分配: 丈夫填 <b>$${bestConfig.otherH}</b>，妻子填 <b>$${bestConfig.otherW}</b><br><br>
+            <strong>🌟 系统推荐最佳方案 (${bestConfig.isJoint ? '建议: 合并评税' : '建议: 分开评税'}):</strong><br>
+            <hr style="border:0; border-top:1px solid #ccc; margin:10px 0;">
+            <b>👶 免税额分配:</b><br>
+            - 所有子女免税额归属: <b>伴侣 ${bestConfig.childTo1 ? '1' : '2'}</b> 名下<br>
+            <br><b>🏥 VHIS 保费分配:</b><br>
+            ${vhisHtml}<br>
+            <br><b>💰 其他共享扣除分配建议:</b><br>
+            - 住宅租金: 伴侣1填 $${d1.rent} | 伴侣2填 $${d2.rent}<br>
+            - 房贷利息: 伴侣1填 $${d1.loan} | 伴侣2填 $${d2.loan}<br>
+            - 长者照顾: 伴侣1填 $${d1.care} | 伴侣2填 $${d2.care}<br>
+            - 慈善捐款: 伴侣1填 $${d1.charity} | 伴侣2填 $${d2.charity}<br>
+            <hr style="border:0; border-top:1px solid #ccc; margin:10px 0;">
             📊 <strong>预计缴税金额:</strong><br>
             ${bestConfig.isJoint 
-                ? `家庭总计需缴税: <b style="color:red; font-size:18px;">$${bestConfig.totalTax.toLocaleString()}</b>`
-                : `丈夫需缴: $${bestConfig.taxH.toLocaleString()} | 妻子需缴: $${bestConfig.taxW.toLocaleString()}<br>
-                   家庭总计需缴税: <b style="color:red; font-size:18px;">$${bestConfig.totalTax.toLocaleString()}</b>`
+                ? `家庭合并总计需缴税: <b style="color:#d9534f; font-size:18px;">$${bestConfig.totalTax.toLocaleString()}</b>`
+                : `伴侣 1 需缴: $${bestConfig.tax1.toLocaleString()} | 伴侣 2 需缴: $${bestConfig.tax2.toLocaleString()}<br>
+                   家庭分开总计需缴税: <b style="color:#d9534f; font-size:18px;">$${bestConfig.totalTax.toLocaleString()}</b>`
             }
         `;
     }
 
-    // 交互辅助：自动计算剩余额度
-    document.getElementById('customRentH').addEventListener('input', function() {
-        let total = Number(document.getElementById('rentTotal').value) || 0;
-        let h = Number(this.value) || 0;
-        document.getElementById('customRentW').value = Math.max(0, total - h);
-    });
-    document.getElementById('customOtherH').addEventListener('input', function() {
-        let total = Number(document.getElementById('otherTotal').value) || 0;
-        let h = Number(this.value) || 0;
-        document.getElementById('customOtherW').value = Math.max(0, total - h);
-    });
-
     // 验证自定义配置
     function verifyCustomAllocation() {
         if (minTaxGlobal === null) {
-            alert("请先点击『生成最佳分配模式』以建立系统基准！");
+            alert("请先在上方点击『生成最佳分配模式』以建立系统基准！");
             return;
         }
 
-        let incH = Number(document.getElementById('incH').value) || 0;
-        let dedH = Number(document.getElementById('dedH').value) || 0;
-        let incW = Number(document.getElementById('incW').value) || 0;
-        let dedW = Number(document.getElementById('dedW').value) || 0;
+        let inc1 = Number(document.getElementById('inc1').value) || 0;
+        let allowDeps1 = Number(document.getElementById('allow1').value) || 0;
+        let ded1 = (Number(document.getElementById('mpf1').value) || 0) + 
+                   (Number(document.getElementById('edu1').value) || 0) + 
+                   (Number(document.getElementById('qdap1').value) || 0) + 
+                   (Number(document.getElementById('exp1').value) || 0);
+
+        let inc2 = Number(document.getElementById('inc2').value) || 0;
+        let allowDeps2 = Number(document.getElementById('allow2').value) || 0;
+        let ded2 = (Number(document.getElementById('mpf2').value) || 0) + 
+                   (Number(document.getElementById('edu2').value) || 0) + 
+                   (Number(document.getElementById('qdap2').value) || 0) + 
+                   (Number(document.getElementById('exp2').value) || 0);
+
         let childrenCount = Number(document.getElementById('children').value) || 0;
-        
-        let rentTotal = Number(document.getElementById('rentTotal').value) || 0;
-        let otherTotal = Number(document.getElementById('otherTotal').value) || 0;
-
-        let rentH = Number(document.getElementById('customRentH').value) || 0;
-        let rentW = Number(document.getElementById('customRentW').value) || 0;
-        let otherH = Number(document.getElementById('customOtherH').value) || 0;
-        let otherW = Number(document.getElementById('customOtherW').value) || 0;
-
-        if ((rentH + rentW) !== rentTotal || (otherH + otherW) !== otherTotal) {
-            alert("错误：您分配的租金或其它扣除额度之和，与第二部分填写的总额不符！");
-            return;
-        }
-
-        let isJoint = document.getElementById('customJoint').value === "true";
-        let childToH = document.getElementById('customChild').value === "H";
         let totalChildAllowance = childrenCount * CHILD_ALLOWANCE_PER_KID;
 
-        let totalTax = 0, taxH = 0, taxW = 0;
+        let totalContinuous = (Number(document.getElementById('rentTotal').value) || 0) +
+                              (Number(document.getElementById('loanTotal').value) || 0) +
+                              (Number(document.getElementById('careTotal').value) || 0) +
+                              (Number(document.getElementById('charityTotal').value) || 0);
+
+        let share1 = Number(document.getElementById('customShare1').value) || 0;
+        let share2 = Number(document.getElementById('customShare2').value) || 0;
+
+        if (Math.abs((share1 + share2) - totalContinuous) > 1) {
+            alert("错误：您分配的共享扣除之和，与上方填写的各类共享总额不符！");
+            return;
+        }
+
+        // 读取自定义的 VHIS 分配
+        let vhisItems = getVHISData();
+        let vhis1 = 0, vhis2 = 0;
+        vhisItems.forEach(item => {
+            let selectBox = document.getElementById(`custom-vhis-assign-${item.id}`);
+            if(selectBox && selectBox.value === "1") vhis1 += item.amount;
+            else vhis2 += item.amount;
+        });
+
+        let isJoint = document.getElementById('customJoint').value === "true";
+        let childTo1 = document.getElementById('customChild').value === "1";
+
+        let totalTax = 0, tax1 = 0, tax2 = 0;
 
         if (isJoint) {
-            let ntiJoint = (incH + incW) - (dedH + dedW + rentTotal + otherTotal);
-            totalTax = calculateSingleTax(ntiJoint, MARRIED_ALLOWANCE + totalChildAllowance);
+            let jointNti = (inc1 + inc2) - (ded1 + ded2 + vhis1 + vhis2 + totalContinuous);
+            let jointAllow = MARRIED_ALLOWANCE + allowDeps1 + allowDeps2 + totalChildAllowance;
+            totalTax = calculateSingleTax(jointNti, jointAllow);
         } else {
-            let ntiH = incH - (dedH + rentH + otherH);
-            let ntiW = incW - (dedW + rentW + otherW);
-            taxH = calculateSingleTax(ntiH, BASIC_ALLOWANCE + (childToH ? totalChildAllowance : 0));
-            taxW = calculateSingleTax(ntiW, BASIC_ALLOWANCE + (!childToH ? totalChildAllowance : 0));
-            totalTax = taxH + taxW;
+            let nti1 = inc1 - (ded1 + vhis1 + share1);
+            let nti2 = inc2 - (ded2 + vhis2 + share2);
+            let allow1 = BASIC_ALLOWANCE + allowDeps1 + (childTo1 ? totalChildAllowance : 0);
+            let allow2 = BASIC_ALLOWANCE + allowDeps2 + (!childTo1 ? totalChildAllowance : 0);
+            
+            tax1 = calculateSingleTax(nti1, allow1);
+            tax2 = calculateSingleTax(nti2, allow2);
+            totalTax = tax1 + tax2;
         }
 
         let resDiv = document.getElementById('verifyResult');
         resDiv.style.display = 'block';
         
         let isOptimal = Math.abs(totalTax - minTaxGlobal) <= 0.01;
-        
         resDiv.className = isOptimal ? 'result-box success' : 'result-box warning';
         
         resDiv.innerHTML = `
-            <strong>${isOptimal ? '✅ 恭喜！您选择的方案属于最佳分配组合之一。' : '⚠️ 留意：您选择的方案不是最省税的。'}</strong><br>
+            <strong>${isOptimal ? '✅ 恭喜！您自选的分配方案达到了最佳省税效果。' : '⚠️ 留意：您选择的方案不是最省税的。'}</strong><br><br>
             您当前方案的缴税额：<br>
             ${isJoint 
-                ? `合并需缴税: $${totalTax.toLocaleString()}`
-                : `丈夫需缴: $${taxH.toLocaleString()} | 妻子需缴: $${taxW.toLocaleString()} | <b>总计: $${totalTax.toLocaleString()}</b>`
+                ? `合并评税总额: $${totalTax.toLocaleString()}`
+                : `伴侣 1 需缴: $${tax1.toLocaleString()} | 伴侣 2 需缴: $${tax2.toLocaleString()} | <b>总计: $${totalTax.toLocaleString()}</b>`
             }<br>
             <br>
-            ${!isOptimal ? `💡 相比系统最佳方案 ($${minTaxGlobal.toLocaleString()})，此方案会让您<b>多缴税 $${(totalTax - minTaxGlobal).toLocaleString()}</b>。` : ''}
+            ${!isOptimal ? `💡 相比系统计算的最佳方案 ($${minTaxGlobal.toLocaleString()})，此方案会让你们<b>多缴税 $${(totalTax - minTaxGlobal).toLocaleString()}</b>。` : ''}
         `;
     }
+    
+    // 初始化时加一行 VHIS 示例
+    window.onload = function() {
+        addVHISItem();
+    };
 </script>
 </body>
 </html>
